@@ -151,7 +151,7 @@ export function TaskFormModal({ mode, open, task, onClose, onSubmit }: TaskFormM
                     <FormLabel>Status</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-testid="status-select">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>

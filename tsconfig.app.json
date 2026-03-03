@@ -8,6 +8,6 @@
     "jsx": "react-jsx",
     "noEmit": true
   },
-  "include": ["src"],
-  "exclude": ["src/server/**/*", "src/**/*.test-d.ts"]
+  "include": ["src", "playwright", "playwright.config.ts"],
+  "exclude": ["src/**/*.test-d.ts"]
 }

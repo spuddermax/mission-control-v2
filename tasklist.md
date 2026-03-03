@@ -10,9 +10,9 @@
 5. Mark each task as complete in this tasklist by filling in the checkbox: "[x] {commit-id}"
 
 ## 0. Reset & Bootstrap
-- [ ] Remove broken `src/`, config artifacts, and stale deps (keep docs: PRD.md, README.md, tasklist.md).
-- [ ] `npm init`/`npm create vite@latest` (React + TS) in `projects/mission-control`.
-- [ ] Commit `chore: rebootstrap mission-control (clean slate)`.
+- [x] 567f719 Remove broken `src/`, config artifacts, and stale deps (keep docs: PRD.md, README.md, tasklist.md).
+- [x] 567f719 `npm init`/`npm create vite@latest` (React + TS) in `projects/mission-control`.
+- [x] 567f719 Commit `chore: rebootstrap mission-control (clean slate)`.
 
 ## 1. Baseline Config (Fresh Project)
 - [ ] Install core deps: React 18.3, React Router 6.27, TanStack Query 5, tRPC v10, zod, Express, better-sqlite3, drizzle-orm, shadcn/ui, lucide-react.

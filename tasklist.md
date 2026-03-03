@@ -41,10 +41,10 @@
 
 ## 4. Backend API
 
-- [ ] `src/server/trpc.ts` (context, routers, error formatter).
-- [ ] `src/server/routers/tasks.ts` (list/create/update/delete per PRD filters, soft-delete handling).
-- [ ] `src/server/index.ts` (Express app, helmet/cors/compression, `/api/trpc` handler, health endpoint, port 3001).
-- [ ] Dev script `npm run server:dev` (tsx watch) wired into `npm run dev` alongside Vite.
+- [x] 903bfbb `src/server/trpc.ts` (context, routers, error formatter).
+- [x] cd4ed0e `src/server/routers/tasks.ts` (list/create/update/delete per PRD filters, soft-delete handling).
+- [x] 54fac45 `src/server/index.ts` (Express app, helmet/cors/compression, `/api/trpc` handler, health endpoint, port 3001).
+- [x] 597c207 Dev script `npm run server:dev` (tsx watch) wired into `npm run dev` alongside Vite.
 
 ## 5. Frontend (Vite React UI)
 

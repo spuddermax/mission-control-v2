@@ -11,7 +11,9 @@
     "vite.config.ts",
     "vitest.config.ts",
     "tailwind.config.ts",
-    "postcss.config.mjs"
+    "postcss.config.mjs",
+    "drizzle.config.ts",
+    "src/server/**/*.ts"
   ],
-  "exclude": ["src"]
+  "exclude": ["src/client", "src/**/*.{ts,tsx}"]
 }

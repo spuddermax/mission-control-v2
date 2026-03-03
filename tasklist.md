@@ -70,5 +70,5 @@
 ## 8. Review & Handoff
 
 - [x] (HEAD) Record screencap/gif of MVP flow.
-- [ ] Final README update (features, scripts, architecture notes).
+- [x] (HEAD) Final README update (features, scripts, architecture notes).
 - [ ] Push branch + create pull request for review.

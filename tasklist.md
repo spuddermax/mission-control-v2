@@ -48,10 +48,10 @@
 
 ## 5. Frontend (Vite React UI)
 
-- [ ] `src/main.tsx` with QueryClientProvider, TRPC provider, Router.
-- [ ] `src/App.tsx` layout + routes (Tasks page default, nav placeholders hidden).
-- [ ] Components: Sidebar, TaskList, TaskCard, Filters, Create/Edit modal, Delete confirm dialog.
-- [ ] Global styles (`src/index.css`) aligned with Linear aesthetic.
+- [x] 69ceda2 `src/main.tsx` with QueryClientProvider, TRPC provider, Router.
+- [x] 4da2904 `src/App.tsx` layout + routes (Tasks page default, nav placeholders hidden).
+- [x] 82988d7 Components: Sidebar, TaskList, TaskCard, Filters, Create/Edit modal, Delete confirm dialog.
+- [x] ac065ee Global styles (`src/index.css`) aligned with Linear aesthetic.
 
 ## 6. Integrations & Polish
 

@@ -34,10 +34,10 @@
 
 ## 3. Database Layer
 
-- [ ] `src/server/db/schema.ts` with agents/tasks/task_notes tables (updated_at, deleted_at, updated_by columns, indexes, relations helper).
-- [ ] `src/server/db/index.ts` (better-sqlite3 singleton, WAL, FK pragma, migrations bootstrap).
-- [ ] npm scripts: `db:generate`, `db:migrate`, `db:studio`.
-- [ ] Seeds for baseline agents/tasks + Vitest seed helper.
+- [x] 2ab7e25 `src/server/db/schema.ts` with agents/tasks/task_notes tables (updated_at, deleted_at, updated_by columns, indexes, relations helper).
+- [x] 9f1eb15 `src/server/db/index.ts` (better-sqlite3 singleton, WAL, FK pragma, migrations bootstrap).
+- [x] 9ed0eae npm scripts: `db:generate`, `db:migrate`, `db:studio`.
+- [x] f54c1df Seeds for baseline agents/tasks + Vitest seed helper.
 
 ## 4. Backend API
 

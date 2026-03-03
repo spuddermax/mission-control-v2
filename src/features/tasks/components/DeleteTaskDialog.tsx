@@ -11,11 +11,18 @@ import {
 type DeleteTaskDialogProps = {
   open: boolean
   taskTitle?: string
+  isConfirming?: boolean
   onClose: () => void
   onConfirm: () => Promise<void> | void
 }
 
-export function DeleteTaskDialog({ open, taskTitle, onClose, onConfirm }: DeleteTaskDialogProps) {
+export function DeleteTaskDialog({
+  open,
+  taskTitle,
+  isConfirming = false,
+  onClose,
+  onConfirm,
+}: DeleteTaskDialogProps) {
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       onClose()
@@ -38,11 +45,16 @@ export function DeleteTaskDialog({ open, taskTitle, onClose, onConfirm }: Delete
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" disabled={isConfirming} onClick={onClose}>
             Cancel
           </Button>
-          <Button type="button" variant="destructive" onClick={handleConfirm}>
-            Delete
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isConfirming}
+            onClick={handleConfirm}
+          >
+            {isConfirming ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

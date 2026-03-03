@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
+import type { InfiniteData } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
-import type { RouterOutputs } from '@/utils/trpc'
+import type { RouterInputs, RouterOutputs } from '@/utils/trpc'
 import { trpc } from '@/utils/trpc'
 
 import { DeleteTaskDialog } from './components/DeleteTaskDialog'
@@ -23,6 +24,7 @@ const defaultFilters: FilterState = {
 }
 
 const DEFAULT_AUTHOR_ID = 1
+const PAGE_SIZE = 20
 
 export function TasksPage() {
   const utils = trpc.useUtils()
@@ -31,31 +33,112 @@ export function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
 
-  const tasksQuery = trpc.tasks.list.useInfiniteQuery(
-    {
-      limit: 20,
+  const queryInput = useMemo(
+    () => ({
+      limit: PAGE_SIZE,
       filter: normalizeFilters(filters),
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    }),
+    [filters],
   )
+
+  const tasksQuery = trpc.tasks.list.useInfiniteQuery(queryInput, {
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  })
+
+  if (tasksQuery.status === 'error') {
+    throw tasksQuery.error
+  }
 
   const tasks = useMemo(
     () => tasksQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [tasksQuery.data],
   )
 
+  const isInitialLoading = tasksQuery.status === 'loading'
+  const isFetchingMore = tasksQuery.isFetchingNextPage
+  const isRefetching = tasksQuery.isFetching && !isFetchingMore && !isInitialLoading
+
   const createMutation = trpc.tasks.create.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    async onMutate(input) {
+      await utils.tasks.list.cancel(queryInput)
+      const previousData = utils.tasks.list.getInfiniteData(queryInput)
+      const optimisticTask = buildOptimisticTask(input)
+
+      utils.tasks.list.setInfiniteData(queryInput, (data) =>
+        prependTaskToCache(data, optimisticTask),
+      )
+
+      return { previousData, optimisticId: optimisticTask.id }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        utils.tasks.list.setInfiniteData(queryInput, context.previousData)
+      }
+    },
+    onSuccess: (task, _variables, context) => {
+      utils.tasks.list.setInfiniteData(queryInput, (data) =>
+        replaceOrInsertTask(data, context?.optimisticId ?? task.id, task),
+      )
+    },
+    onSettled: () => {
+      utils.tasks.list.invalidate(queryInput)
+    },
   })
 
   const updateMutation = trpc.tasks.update.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    async onMutate(input) {
+      await utils.tasks.list.cancel(queryInput)
+      const previousData = utils.tasks.list.getInfiniteData(queryInput)
+
+      utils.tasks.list.setInfiniteData(queryInput, (data) =>
+        mapTaskInCache(data, input.id, (task) => ({
+          ...task,
+          title: input.title ?? task.title,
+          description: input.description ?? task.description,
+          status: input.status ?? task.status,
+          priority: input.priority ?? task.priority,
+          assigneeAgentId:
+            input.assigneeAgentId !== undefined ? input.assigneeAgentId : task.assigneeAgentId,
+          updatedByAgentId:
+            input.updatedByAgentId !== undefined ? input.updatedByAgentId : task.updatedByAgentId,
+          updatedAt: new Date().toISOString(),
+        })),
+      )
+
+      return { previousData }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        utils.tasks.list.setInfiniteData(queryInput, context.previousData)
+      }
+    },
+    onSuccess: (task) => {
+      utils.tasks.list.setInfiniteData(queryInput, (data) =>
+        mapTaskInCache(data, task.id, () => task),
+      )
+    },
+    onSettled: () => {
+      utils.tasks.list.invalidate(queryInput)
+    },
   })
 
   const deleteMutation = trpc.tasks.delete.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    async onMutate(input) {
+      await utils.tasks.list.cancel(queryInput)
+      const previousData = utils.tasks.list.getInfiniteData(queryInput)
+
+      utils.tasks.list.setInfiniteData(queryInput, (data) => removeTaskFromCache(data, input.id))
+
+      return { previousData }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        utils.tasks.list.setInfiniteData(queryInput, context.previousData)
+      }
+    },
+    onSettled: () => {
+      utils.tasks.list.invalidate(queryInput)
+    },
   })
 
   const handleCreate = async (values: TaskFormValues) => {
@@ -101,7 +184,9 @@ export function TasksPage() {
 
       <TaskList
         tasks={tasks}
-        isLoading={tasksQuery.isFetching}
+        isInitialLoading={isInitialLoading}
+        isRefetching={isRefetching}
+        isFetchingMore={isFetchingMore}
         hasMore={Boolean(tasksQuery.hasNextPage)}
         onLoadMore={() => tasksQuery.fetchNextPage()}
         onEdit={(task) => setEditingTask(task)}
@@ -126,6 +211,7 @@ export function TasksPage() {
       <DeleteTaskDialog
         open={Boolean(deletingTask)}
         taskTitle={deletingTask?.title}
+        isConfirming={deleteMutation.isPending}
         onClose={() => setDeletingTask(null)}
         onConfirm={handleDelete}
       />
@@ -138,5 +224,96 @@ function normalizeFilters(filters: FilterState) {
     status: filters.status.length ? filters.status : undefined,
     priority: filters.priority.length ? filters.priority : undefined,
     assigneeId: filters.assigneeId ? Number(filters.assigneeId) : undefined,
+  }
+}
+
+type TasksInfiniteData = InfiniteData<RouterOutputs['tasks']['list']>
+
+function prependTaskToCache(data: TasksInfiniteData | undefined, task: Task) {
+  if (!data) {
+    return data
+  }
+  return {
+    ...data,
+    pages: data.pages.map((page, index) =>
+      index === 0 ? { ...page, items: [task, ...page.items] } : page,
+    ),
+  }
+}
+
+function mapTaskInCache(
+  data: TasksInfiniteData | undefined,
+  taskId: number,
+  mapper: (task: Task) => Task,
+) {
+  if (!data) return data
+  let found = false
+  const nextData = {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      items: page.items.map((task) => {
+        if (task.id === taskId) {
+          found = true
+          return mapper(task)
+        }
+        return task
+      }),
+    })),
+  }
+  return found ? nextData : data
+}
+
+function replaceOrInsertTask(data: TasksInfiniteData | undefined, lookupId: number, task: Task) {
+  if (!data) return data
+  let found = false
+  const nextData = {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      items: page.items.map((existing) => {
+        if (existing.id === lookupId) {
+          found = true
+          return task
+        }
+        return existing
+      }),
+    })),
+  }
+  return found ? nextData : prependTaskToCache(nextData, task)
+}
+
+function removeTaskFromCache(data: TasksInfiniteData | undefined, taskId: number) {
+  if (!data) return data
+  return {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      items: page.items.filter((task) => task.id !== taskId),
+    })),
+  }
+}
+
+let optimisticIdCursor = -1
+
+function buildOptimisticTask(input: RouterInputs['tasks']['create']): Task {
+  optimisticIdCursor -= 1
+  const timestamp = new Date().toISOString()
+
+  return {
+    id: optimisticIdCursor,
+    title: input.title,
+    description: input.description ?? '',
+    status: input.status ?? 'todo',
+    priority: input.priority ?? 0,
+    createdByAgentId: input.createdByAgentId ?? DEFAULT_AUTHOR_ID,
+    assigneeAgentId: input.assigneeAgentId ?? null,
+    updatedByAgentId: input.createdByAgentId ?? DEFAULT_AUTHOR_ID,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    deletedAt: null,
+    creator: null,
+    assignee: null,
+    notes: [],
   }
 }

@@ -8,12 +8,22 @@ import App from './App'
 import './index.css'
 import { trpc } from './utils/trpc'
 import { TasksPage } from './features/tasks/TasksPage'
+import { QueryBoundary } from './components/QueryBoundary'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
-    children: [{ index: true, element: <TasksPage /> }],
+    children: [
+      {
+        index: true,
+        element: (
+          <QueryBoundary>
+            <TasksPage />
+          </QueryBoundary>
+        ),
+      },
+    ],
   },
 ])
 

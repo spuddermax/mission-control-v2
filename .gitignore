@@ -17,6 +17,8 @@ dist-ssr/
 
 # Database + migrations
 db.sqlite
+db.sqlite-shm
+db.sqlite-wal
 db.*.sqlite
 /turbo/
 drizzle/

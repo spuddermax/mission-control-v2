@@ -57,7 +57,7 @@
 
 - [x] 60d5f5e shadcn/ui init + component imports (Button, Card, Dialog, Badge, Separator, Input, Select, Form).
 - [x] d47da49 `utils/trpc.ts` for strongly-typed client.
-- [ ] Loading states, error boundaries, optimistic mutation UX.
+- [x] b6ca08c Loading states, error boundaries, optimistic mutation UX.
 - [ ] Theme tokens (colors, spacing) + iconography pass.
 
 ## 7. Testing & Deploy Prep

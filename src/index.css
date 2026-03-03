@@ -4,18 +4,41 @@
 
 @layer base {
   :root {
-    --background: 210 40% 96%;
-    --foreground: 222 47% 11%;
-    --muted: 210 20% 90%;
-    --muted-foreground: 215 16% 47%;
+    --background: 219 32% 97%;
+    --foreground: 230 26% 12%;
+    --muted: 219 24% 92%;
+    --muted-foreground: 226 16% 45%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 230 26% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
-    --radius: 0.75rem;
+    --card-foreground: 230 26% 12%;
+    --border: 214 32% 90%;
+    --input: 214 32% 90%;
+    --primary: 222 89% 63%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 222 28% 90%;
+    --secondary-foreground: 228 25% 20%;
+    --accent: 266 85% 78%;
+    --accent-foreground: 237 40% 20%;
+    --destructive: 348 78% 53%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 222 86% 60%;
+    --radius: 0.9rem;
+
+    --sidebar-bg: 232 27% 11%;
+    --sidebar-foreground: 214 33% 96%;
+    --sidebar-muted: 220 15% 65%;
+    --sidebar-active: 222 89% 63%;
+    --surface-raised: 0 0% 100%;
+    --surface-muted: 218 33% 96%;
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
   }
 
   body {
@@ -27,8 +50,8 @@
       BlinkMacSystemFont,
       'Segoe UI',
       sans-serif;
-    background: radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 45%),
-      radial-gradient(circle at 20% 20%, rgba(147, 51, 234, 0.18), transparent 40%),
+    background: radial-gradient(circle at 15% 20%, hsl(var(--accent) / 0.25), transparent 45%),
+      radial-gradient(circle at 80% 0%, hsl(var(--primary) / 0.25), transparent 45%),
       hsl(var(--background));
     min-height: 100vh;
     color: hsl(var(--foreground));
@@ -44,68 +67,80 @@
 .app-shell {
   display: flex;
   min-height: 100vh;
+  background: linear-gradient(180deg, hsl(var(--surface-muted)) 0%, transparent 220px);
 }
 
 .sidebar {
-  width: 240px;
-  padding: 2rem 1.5rem;
-  background: rgba(15, 18, 27, 0.9);
-  color: #f5f5f5;
+  width: 256px;
+  padding: var(--space-6) var(--space-5);
+  background: hsl(var(--sidebar-bg));
+  color: hsl(var(--sidebar-foreground));
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  gap: var(--space-5);
+  border-right: 1px solid hsl(var(--sidebar-foreground) / 0.08);
+  box-shadow: inset -1px 0 0 hsl(var(--sidebar-foreground) / 0.05);
 }
 
 .sidebar__brand {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
   align-items: center;
 }
 
 .sidebar__logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.35), hsl(var(--accent) / 0.35));
   display: grid;
   place-items: center;
   font-size: 1.5rem;
+  color: hsl(var(--sidebar-foreground));
 }
 
 .sidebar__title {
   font-size: 1rem;
   font-weight: 600;
+  margin: 0;
 }
 
 .sidebar__subtitle {
   font-size: 0.85rem;
-  opacity: 0.8;
+  opacity: 0.65;
+  margin: 0;
 }
 
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .sidebar__link {
   display: flex;
-  gap: 0.6rem;
+  gap: var(--space-3);
   align-items: center;
   padding: 0.65rem 0.9rem;
-  border-radius: 10px;
+  border-radius: 12px;
   color: inherit;
   text-decoration: none;
   font-weight: 500;
   transition:
     background 0.2s,
-    color 0.2s;
+    color 0.2s,
+    transform 0.2s;
+}
+
+.sidebar__link:hover {
+  transform: translateX(2px);
+  background: hsl(var(--sidebar-foreground) / 0.08);
 }
 
 .sidebar__link--active {
-  background: rgba(59, 130, 246, 0.15);
-  color: #fff;
+  background: hsl(var(--primary) / 0.15);
+  color: hsl(var(--sidebar-foreground));
+  box-shadow: 0 8px 18px hsl(var(--primary) / 0.25);
 }
 
 .sidebar__link--disabled {
@@ -113,18 +148,34 @@
   cursor: not-allowed;
 }
 
+.sidebar__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--sidebar-foreground) / 0.08);
+  color: hsl(var(--sidebar-muted));
+}
+
+.sidebar__link--active .sidebar__icon {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
 .main-pane {
   flex: 1;
-  padding: 2rem 3rem;
+  padding: var(--space-6) var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-6);
 }
 
 .page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 
 .page__header {
@@ -141,5 +192,31 @@
 
 .page__subtitle {
   margin: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.icon-chip {
+  --icon-chip-size: 2.25rem;
+  width: var(--icon-chip-size);
+  height: var(--icon-chip-size);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+}
+
+.icon-chip--sm {
+  --icon-chip-size: 1.75rem;
+}
+
+.icon-chip--accent {
+  background: hsl(var(--accent) / 0.12);
+  color: hsl(var(--accent));
+}
+
+.icon-chip--muted {
+  background: hsl(var(--muted) / 0.6);
   color: hsl(var(--muted-foreground));
 }

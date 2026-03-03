@@ -1,3 +1,5 @@
+import { Filter } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -48,7 +50,12 @@ export function TaskFilters({ value, onChange }: TaskFiltersProps) {
   return (
     <Card className="backdrop-blur">
       <CardHeader>
-        <CardTitle className="text-base">Filters</CardTitle>
+        <CardTitle className="flex items-center gap-3 text-base">
+          <span className="icon-chip icon-chip--accent icon-chip--sm">
+            <Filter className="h-3.5 w-3.5" />
+          </span>
+          Filters
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 text-sm">
         <div className="space-y-3">

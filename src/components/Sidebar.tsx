@@ -24,7 +24,9 @@ export function Sidebar() {
           if (item.disabled) {
             return (
               <div key={item.to} className="sidebar__link sidebar__link--disabled">
-                <Icon size={18} />
+                <span className="sidebar__icon" aria-hidden="true">
+                  <Icon size={16} />
+                </span>
                 <span>{item.label}</span>
               </div>
             )
@@ -39,7 +41,9 @@ export function Sidebar() {
                 ['sidebar__link', isActive && 'sidebar__link--active'].filter(Boolean).join(' ')
               }
             >
-              <Icon size={18} />
+              <span className="sidebar__icon" aria-hidden="true">
+                <Icon size={16} />
+              </span>
               <span>{item.label}</span>
             </NavLink>
           )

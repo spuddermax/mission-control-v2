@@ -1,4 +1,15 @@
-import { CalendarClock, UserRound } from 'lucide-react'
+import type { ComponentType } from 'react'
+
+import {
+  CalendarClock,
+  CheckCircle2,
+  CircleDashed,
+  Flame,
+  Loader2,
+  OctagonAlert,
+  Sparkles,
+  UserRound,
+} from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,29 +25,6 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import type { RouterOutputs } from '@/utils/trpc'
 
-const statusClasses: Record<string, string> = {
-  todo: 'bg-slate-100 text-slate-700',
-  'in-progress': 'bg-blue-100 text-blue-700',
-  blocked: 'bg-rose-100 text-rose-700',
-  done: 'bg-emerald-100 text-emerald-700',
-}
-
-const priorityLabels: Record<number, string> = {
-  0: 'Low',
-  1: 'Medium',
-  2: 'High',
-  3: 'Critical',
-  4: 'Critical',
-  5: 'Critical',
-}
-
-const priorityClasses: Record<number, string> = {
-  0: 'bg-slate-100 text-slate-700',
-  1: 'bg-amber-100 text-amber-700',
-  2: 'bg-orange-100 text-orange-700',
-  3: 'bg-red-100 text-red-700',
-}
-
 type Task = RouterOutputs['tasks']['list']['items'][number]
 
 type TaskCardProps = {
@@ -45,9 +33,31 @@ type TaskCardProps = {
   onDelete: (task: Task) => void
 }
 
+const statusThemes: Record<
+  string,
+  { className: string; Icon: ComponentType<{ className?: string }> }
+> = {
+  todo: { className: 'bg-blue-50 text-blue-700', Icon: CircleDashed },
+  'in-progress': { className: 'bg-sky-50 text-sky-700', Icon: Loader2 },
+  blocked: { className: 'bg-rose-50 text-rose-700', Icon: OctagonAlert },
+  done: { className: 'bg-emerald-50 text-emerald-700', Icon: CheckCircle2 },
+}
+
+const priorityThemes: Record<
+  number,
+  { className: string; label: string; Icon: ComponentType<{ className?: string }> }
+> = {
+  0: { className: 'bg-slate-100 text-slate-700', label: 'Low', Icon: Sparkles },
+  1: { className: 'bg-amber-50 text-amber-700', label: 'Medium', Icon: Sparkles },
+  2: { className: 'bg-orange-50 text-orange-700', label: 'High', Icon: Flame },
+  3: { className: 'bg-red-50 text-red-700', label: 'Critical', Icon: Flame },
+  4: { className: 'bg-red-50 text-red-700', label: 'Critical', Icon: Flame },
+  5: { className: 'bg-red-50 text-red-700', label: 'Critical', Icon: Flame },
+}
+
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
-  const statusBadge = statusClasses[task.status] ?? 'bg-slate-100 text-slate-700'
-  const priorityBadge = priorityClasses[task.priority] ?? 'bg-slate-100 text-slate-700'
+  const statusTheme = statusThemes[task.status] ?? statusThemes.todo
+  const priorityTheme = priorityThemes[task.priority] ?? priorityThemes[0]
 
   return (
     <Card className="backdrop-blur">
@@ -64,19 +74,33 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           </CardDescription>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge className={cn('text-xs font-semibold capitalize', statusBadge)}>
-            {task.status}
+          <Badge className={cn('text-xs font-semibold capitalize gap-1.5', statusTheme.className)}>
+            <statusTheme.Icon
+              className={cn('h-3.5 w-3.5', task.status === 'in-progress' && 'animate-spin')}
+            />
+            {task.status.replace('-', ' ')}
           </Badge>
-          <Badge className={cn('text-xs font-semibold', priorityBadge)}>
-            {priorityLabels[task.priority] ?? `P${task.priority}`}
+          <Badge className={cn('text-xs font-semibold gap-1.5', priorityTheme.className)}>
+            <priorityTheme.Icon className="h-3.5 w-3.5" />
+            {priorityTheme.label ?? `P${task.priority}`}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {task.description && <p className="text-sm text-foreground/90">{task.description}</p>}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <CalendarClock className="h-4 w-4" />
-          <span>{new Date(task.createdAt ?? '').toLocaleString()}</span>
+        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            <span className="icon-chip icon-chip--muted icon-chip--sm">
+              <CalendarClock className="h-3.5 w-3.5" />
+            </span>
+            <span>{new Date(task.createdAt ?? '').toLocaleString()}</span>
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="icon-chip icon-chip--muted icon-chip--sm">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            <span>{task.notes.length} recent notes</span>
+          </span>
         </div>
         {task.notes.length > 0 && (
           <div className="space-y-3 rounded-lg border border-slate-100/60 bg-slate-50/80 p-3">

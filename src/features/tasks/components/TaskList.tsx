@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { ClipboardList, Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import type { RouterOutputs } from '@/utils/trpc'
@@ -35,8 +35,11 @@ export function TaskList({
 
   if (!tasks.length) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-white/80 p-10 text-center text-sm text-muted-foreground">
-        No tasks yet. Create your first mission to get started.
+      <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-slate-200 bg-white/80 p-10 text-center text-sm text-muted-foreground">
+        <span className="icon-chip icon-chip--accent">
+          <ClipboardList className="h-5 w-5" />
+        </span>
+        <p>No tasks yet. Create your first mission to get started.</p>
       </div>
     )
   }

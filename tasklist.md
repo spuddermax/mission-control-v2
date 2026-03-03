@@ -55,7 +55,7 @@
 
 ## 6. Integrations & Polish
 
-- [ ] shadcn/ui init + component imports (Button, Card, Dialog, Badge, Separator, Input, Select, Form).
+- [x] 60d5f5e shadcn/ui init + component imports (Button, Card, Dialog, Badge, Separator, Input, Select, Form).
 - [ ] `utils/trpc.ts` for strongly-typed client.
 - [ ] Loading states, error boundaries, optimistic mutation UX.
 - [ ] Theme tokens (colors, spacing) + iconography pass.

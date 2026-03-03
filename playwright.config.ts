@@ -6,6 +6,13 @@ const SERVER_PORT = Number(process.env.MCP_SERVER_PORT ?? 3001)
 const BASE_URL = `http://${HOST}:${PREVIEW_PORT}`
 const DB_PATH = process.env.PLAYWRIGHT_DB_PATH ?? 'tmp/e2e.db.sqlite'
 
+const VIDEO_MODE =
+  (process.env.PLAYWRIGHT_VIDEO as
+    | 'off'
+    | 'on'
+    | 'retain-on-failure'
+    | 'on-first-retry'
+    | undefined) ?? 'retain-on-failure'
 export default defineConfig({
   testDir: './playwright',
   timeout: 120_000,
@@ -18,7 +25,7 @@ export default defineConfig({
     baseURL: BASE_URL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: VIDEO_MODE,
   },
   projects: [
     {

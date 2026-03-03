@@ -34,12 +34,15 @@ export function TasksPage() {
     return filter ? { limit: PAGE_SIZE, filter } : { limit: PAGE_SIZE }
   }, [filters])
 
-  const infiniteOptions: Parameters<typeof trpc.tasks.list.useInfiniteQuery>[1] = {
+  const infiniteOptions = {
     getNextPageParam: (lastPage: RouterOutputs['tasks']['list']) =>
       lastPage.nextCursor ?? undefined,
   }
 
-  const tasksQuery = trpc.tasks.list.useInfiniteQuery(queryInput, infiniteOptions)
+  const tasksQuery = trpc.tasks.list.useInfiniteQuery(
+    queryInput,
+    infiniteOptions as unknown as Parameters<typeof trpc.tasks.list.useInfiniteQuery>[1],
+  )
 
   if (tasksQuery.status === 'error') {
     throw tasksQuery.error

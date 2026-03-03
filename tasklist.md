@@ -1,74 +1,64 @@
-# Mission Control Task List: Implement PRD v1.0
+# Mission Control Task List — Reset after Grok
 
-**Status:** Open | Progress: 0/XX | Updated: 2026-03-02 22:27 EST
+**Status:** Reset planned | Updated: 2026-03-03 00:14 EST
 
-**Instructions:**
-Carefully complete each step in this task list, one by one, and commit with an appropriate best practice commit statement after completing each individual task. Mark each task as completed [X] as you progress.
+## Instructions (must follow for every task item)
+1. Work **one task item at a time** in the order listed below—no batching unless a sub-bullet explicitly depends on the previous line.
+2. When you believe a task item is finished, **pause and ask yourself:** “Ok, is there anything in what I just coded that I would change? What would I do differently?” Capture fixes immediately before committing.
+3. After the reflection, create a dedicated git commit for that single task item (use descriptive messages like `feat: set up tailwind config`). No multi-task commits.
+4. Only move to the next task once the previous one is fully committed and double-checked.
+5. Mark each task as complete in this tasklist by filling in the checkbox: "[x] {commit-id}"
 
-## 1. Project Setup (Foundation) ✅
-- [x] git init projects/mission-control (master/main branch)
-- [x] package.json (Vite React TS Tailwind tRPC Drizzle Express lucide)
-- [x] npm i (deps + devDeps)
-- [x] .gitignore (.env db.sqlite dist node_modules .certs?)
-- [x] README.md (setup/dev/prod/mkcert /etc/hosts)
-- [x] git add/commit 'chore: init scaffold'
+## 0. Reset & Bootstrap
+- [ ] Remove broken `src/`, config artifacts, and stale deps (keep docs: PRD.md, README.md, tasklist.md).
+- [ ] `npm init`/`npm create vite@latest` (React + TS) in `projects/mission-control`.
+- [ ] Commit `chore: rebootstrap mission-control (clean slate)`.
 
-## 2. Config Files
-- [ ] tailwind.config.js postcss.config.js prettier.config.js
-- [ ] tsconfig.json tsconfig.node.json (strict paths @/*)
-- [ ] eslint.config.mjs (react-hooks refresh typescript)
-- [ ] vite.config.ts (react plugin alias proxy /api →3001)
-- [ ] drizzle.config.ts (schema out dialect sqlite DB_PATH)
-- [ ] .env.example (DB_PATH NODE_ENV)
-- [ ] Husky lint-staged (pre-commit lint fix format)
-- [ ] git commit 'feat: configs (eslint prettier ts vite drizzle tailwind)'
+## 1. Baseline Config (Fresh Project)
+- [ ] Install core deps: React 18.3, React Router 6.27, TanStack Query 5, tRPC v10, zod, Express, better-sqlite3, drizzle-orm, shadcn/ui, lucide-react.
+- [ ] Install dev deps: Vite 5.x, TypeScript 5.8, ESLint + plugins, Prettier, Tailwind 3.4, Vitest, Playwright stub, tsx, drizzle-kit, Husky + lint-staged.
+- [ ] `.gitignore` (node_modules, dist, db.sqlite, drizzle/, .env*, certs, etc.).
+- [ ] README.md updated with fresh install/dev instructions.
 
-## 3. Database (Drizzle SQLite Relational)
-- [ ] src/server/db/schema.ts (agents tasks task_notes tables FK indexes CHECK timestamps)
-- [ ] src/server/db/index.ts (singleton db WAL FK ON migrations seed agents MCP etc.)
-- [ ] npm run db:generate push:migrate studio (verify db.sqlite)
-- [ ] git commit 'feat: db schema migrations seed'
+## 2. Tooling & Config Files
+- [ ] Tailwind + postcss config (shadcn presets, content paths).
+- [ ] `tsconfig.json` + `tsconfig.node.json` (strict, paths @/*).
+- [ ] `vite.config.ts` (React plugin, alias @, `/api` proxy, HTTPS toggle for mcp.lan).
+- [ ] ESLint flat config + Prettier config.
+- [ ] Husky + lint-staged hook for lint/test gate.
+- [ ] Vitest config + `setupTests.ts`.
 
-## 4. Backend Server (Express tRPC)
-- [ ] src/server/trpc.ts (create tRPC router context)
-- [ ] src/server/routers/tasks.ts (list create update delete Zod TRPCError)
-- [ ] src/server/index.ts (Express cors helmet compression tRPC /api/trpc/* HTTPS mkcert dev 3001)
-- [ ] ecosystem.config.cjs (pm2 prod 443 cluster)
-- [ ] npm run server:dev (test API Postman/curl)
-- [ ] git commit 'feat: express tRPC api tasks'
+## 3. Database Layer
+- [ ] `src/server/db/schema.ts` with agents/tasks/task_notes tables (updated_at, deleted_at, updated_by columns, indexes, relations helper).
+- [ ] `src/server/db/index.ts` (better-sqlite3 singleton, WAL, FK pragma, migrations bootstrap).
+- [ ] npm scripts: `db:generate`, `db:migrate`, `db:studio`.
+- [ ] Seeds for baseline agents/tasks + Vitest seed helper.
 
-## 5. Frontend (Vite React UI Linear Style)
-- [ ] src/main.tsx providers.tsx (QueryClient tRPCReactProvider BrowserRouter)
-- [ ] src/App.tsx (Layout Sidebar main Routes /tasks TaskList)
-- [ ] src/components/Sidebar.tsx (nav links icons responsive)
-- [ ] src/components/TaskList.tsx (Tanstack Query trpc.tasks.list grid cards filter status)
-- [ ] src/components/TaskCard.tsx (title status desc actions edit/delete hover)
-- [ ] src/components/CreateTaskModal.tsx (form Zod optimistic shadcn dialog button)
-- [ ] src/index.css (@tailwind + globals)
-- [ ] npm run dev (vite + proxy test CRUD UI)
-- [ ] git commit 'feat: ui tasks list modal router'
+## 4. Backend API
+- [ ] `src/server/trpc.ts` (context, routers, error formatter).
+- [ ] `src/server/routers/tasks.ts` (list/create/update/delete per PRD filters, soft-delete handling).
+- [ ] `src/server/index.ts` (Express app, helmet/cors/compression, `/api/trpc` handler, health endpoint, port 3001).
+- [ ] Dev script `npm run server:dev` (tsx watch) wired into `npm run dev` alongside Vite.
 
-## 6. Integrations/Polish
-- [ ] shadcn/ui init add button dialog card input badge table (Linear theme)
-- [ ] utils/trpc.ts (AppRouter type client infer)
-- [ ] Responsive/mobile (Tailwind)
-- [ ] Error boundaries loading skeletons
-- [ ] git commit 'feat: shadcn polish responsive'
+## 5. Frontend (Vite React UI)
+- [ ] `src/main.tsx` with QueryClientProvider, TRPC provider, Router.
+- [ ] `src/App.tsx` layout + routes (Tasks page default, nav placeholders hidden).
+- [ ] Components: Sidebar, TaskList, TaskCard, Filters, Create/Edit modal, Delete confirm dialog.
+- [ ] Global styles (`src/index.css`) aligned with Linear aesthetic.
 
-## 7. Deploy & Test
-- [ ] mkcert mcp.lan /etc/hosts 127.0.0.1
-- [ ] npm run build
-- [ ] pm2 start ecosystem (test https mcp.lan:443)
-- [ ] E2E: CRUD tasks UI/DB sync, refresh data
-- [ ] Lint format typecheck pass
-- [ ] git commit 'chore: deploy pm2 mkcert'
+## 6. Integrations & Polish
+- [ ] shadcn/ui init + component imports (Button, Card, Dialog, Badge, Separator, Input, Select, Form).
+- [ ] `utils/trpc.ts` for strongly-typed client.
+- [ ] Loading states, error boundaries, optimistic mutation UX.
+- [ ] Theme tokens (colors, spacing) + iconography pass.
 
-## 8. Review & Remote
-- [ ] MVP demo localhost/mcp.lan
-- [ ] User review/feedback
-- [ ] Push remote gh repo fork/PR
+## 7. Testing & Deploy Prep
+- [ ] Vitest suites: DB/tRPC unit tests + React hooks/components.
+- [ ] Playwright smoke stub (create/edit task) using preview build.
+- [ ] `npm run build` + `npm run preview --host mcp.lan --https` verification (mkcert instructions in README).
+- [ ] Document future pm2 deployment (optional) + create demo plan.
 
-**Blockers:** mkcert sudo, pm2 root (elevated).
-**Est Time:** 2-4h ACP auto.
-
-Start #1? 🚀
+## 8. Review & Handoff
+- [ ] Record screencap/gif of MVP flow.
+- [ ] Final README update (features, scripts, architecture notes).
+- [ ] Push branch + create pull request for review.

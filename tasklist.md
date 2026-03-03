@@ -71,4 +71,4 @@
 
 - [x] (HEAD) Record screencap/gif of MVP flow.
 - [x] (HEAD) Final README update (features, scripts, architecture notes).
-- [ ] Push branch + create pull request for review.
+- [x] (PR #1) Push branch + create pull request for review.

@@ -27,6 +27,8 @@ const router = createBrowserRouter([
   },
 ])
 
+ensureReactQueryCompatPrototype()
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -38,6 +40,8 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+ensureReactQueryCompat(queryClient)
 
 const trpcClient = trpc.createClient({
   links: [
@@ -63,3 +67,33 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </trpc.Provider>
   </React.StrictMode>,
 )
+
+const missingMutationDefaults = (() => undefined) as unknown as QueryClient['getMutationDefaults']
+const missingQueryDefaults = (() => undefined) as unknown as QueryClient['getQueryDefaults']
+
+function ensureReactQueryCompatPrototype() {
+  const proto = QueryClient.prototype as QueryClient & {
+    getMutationDefaults?: QueryClient['getMutationDefaults']
+    getQueryDefaults?: QueryClient['getQueryDefaults']
+  }
+
+  if (typeof proto.getMutationDefaults !== 'function') {
+    proto.getMutationDefaults = missingMutationDefaults
+  }
+  if (typeof proto.getQueryDefaults !== 'function') {
+    proto.getQueryDefaults = missingQueryDefaults
+  }
+}
+function ensureReactQueryCompat(client: QueryClient) {
+  const compatClient = client as QueryClient & {
+    getMutationDefaults?: QueryClient['getMutationDefaults']
+    getQueryDefaults?: QueryClient['getQueryDefaults']
+  }
+
+  if (typeof compatClient.getMutationDefaults !== 'function') {
+    compatClient.getMutationDefaults = missingMutationDefaults
+  }
+  if (typeof compatClient.getQueryDefaults !== 'function') {
+    compatClient.getQueryDefaults = missingQueryDefaults
+  }
+}

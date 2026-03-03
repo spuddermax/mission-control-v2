@@ -17,9 +17,10 @@ export default defineConfig({
     globals: true,
     css: true,
     setupFiles: ['./src/test/setupTests.ts'],
+    exclude: [...configDefaults.exclude, 'playwright/**/*'],
     coverage: {
       reporter: ['text', 'lcov'],
-      exclude: [...configDefaults.coverage.exclude, 'src/test/**/*'],
+      exclude: [...(configDefaults.coverage?.exclude ?? []), 'src/test/**/*'],
     },
   },
 })

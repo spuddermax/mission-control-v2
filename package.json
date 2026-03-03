@@ -11,6 +11,9 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,css}\"",
+    "db:generate": "drizzle-kit generate:sqlite --config drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate:sqlite --config drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config drizzle.config.ts",
     "preview": "vite preview",
     "prepare": "husky"
   },

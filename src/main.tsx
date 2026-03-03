@@ -6,7 +6,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
 import App from './App'
 import './index.css'
-import { trpc } from './lib/trpc'
+import { trpc } from './utils/trpc'
 import { TasksPage } from './features/tasks/TasksPage'
 
 const router = createBrowserRouter([

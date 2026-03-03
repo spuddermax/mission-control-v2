@@ -5,7 +5,8 @@ import helmet from 'helmet'
 import { createExpressMiddleware } from '@trpc/server/adapters/express'
 
 import { migrateToLatest } from './db'
-import { appRouter, createTRPCContext } from './trpc'
+import { createTRPCContext } from './trpc'
+import { appRouter } from './router'
 
 const app = express()
 
@@ -47,5 +48,5 @@ start().catch((error) => {
   process.exit(1)
 })
 
-export type { AppRouter } from './trpc'
+export type { AppRouter } from './router'
 export { app }

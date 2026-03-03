@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import type { RouterOutputs } from '@/types/trpc'
+import type { RouterOutputs } from '@/utils/trpc'
 
 const statusClasses: Record<string, string> = {
   todo: 'bg-slate-100 text-slate-700',

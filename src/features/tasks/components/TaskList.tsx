@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import type { RouterOutputs } from '@/types/trpc'
+import type { RouterOutputs } from '@/utils/trpc'
 
 import { TaskCard } from './TaskCard'
 

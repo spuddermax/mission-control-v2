@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { RouterOutputs } from '@/types/trpc'
+import type { RouterOutputs } from '@/utils/trpc'
 
 const statusOptions = [
   { label: 'To Do', value: 'todo' },

@@ -5,7 +5,6 @@ import type { CreateExpressContextOptions } from '@trpc/server/adapters/express'
 import { ZodError } from 'zod'
 
 import { db } from './db'
-import { tasksRouter } from './routers/tasks'
 
 type TrpcContext = {
   db: typeof db
@@ -38,11 +37,6 @@ export const createTRPCRouter = t.router
 export const publicProcedure = t.procedure
 export const middleware = t.middleware
 
-export const appRouter = createTRPCRouter({
-  tasks: tasksRouter,
-})
-
-export type AppRouter = typeof appRouter
 export type AppRouterContext = TrpcContext
 
 export class NotFoundError extends TRPCError {

@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import type { TaskStatus } from '@/server/db/schema'
 
-const statusOptions = [
+const statusOptions: { label: string; value: TaskStatus }[] = [
   { label: 'To Do', value: 'todo' },
   { label: 'In Progress', value: 'in-progress' },
   { label: 'Blocked', value: 'blocked' },
@@ -23,10 +24,12 @@ const priorityOptions = [
 ]
 
 type Filters = {
-  status: string[]
+  status: TaskStatus[]
   priority: number[]
   assigneeId?: number | null
 }
+
+export type TaskFiltersValue = Filters
 
 type TaskFiltersProps = {
   value: Filters
@@ -34,7 +37,7 @@ type TaskFiltersProps = {
 }
 
 export function TaskFilters({ value, onChange }: TaskFiltersProps) {
-  const toggleStatus = (status: string) => {
+  const toggleStatus = (status: TaskStatus) => {
     const next = value.status.includes(status)
       ? value.status.filter((item) => item !== status)
       : [...value.status, status]
@@ -122,7 +125,7 @@ export function TaskFilters({ value, onChange }: TaskFiltersProps) {
             }
           />
         </div>
-        {(value.status.length > 0 || value.priority.length > 0 || value.assigneeId) && (
+        {(value.status.length > 0 || value.priority.length > 0 || value.assigneeId != null) && (
           <div className="flex flex-wrap gap-2 pt-2 text-xs">
             {value.status.map((status) => (
               <Badge key={`status-${status}`} variant="outline" className="capitalize">
@@ -134,7 +137,7 @@ export function TaskFilters({ value, onChange }: TaskFiltersProps) {
                 P{priority}
               </Badge>
             ))}
-            {value.assigneeId && <Badge variant="outline">Agent {value.assigneeId}</Badge>}
+            {value.assigneeId != null && <Badge variant="outline">Agent {value.assigneeId}</Badge>}
           </div>
         )}
       </CardContent>

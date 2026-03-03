@@ -6,17 +6,13 @@ import type { RouterInputs, RouterOutputs } from '@/utils/trpc'
 import { trpc } from '@/utils/trpc'
 
 import { DeleteTaskDialog } from './components/DeleteTaskDialog'
-import { TaskFilters } from './components/TaskFilters'
+import { TaskFilters, type TaskFiltersValue } from './components/TaskFilters'
 import { TaskFormModal, type TaskFormValues } from './components/TaskFormModal'
 import { TaskList } from './components/TaskList'
 
 type Task = RouterOutputs['tasks']['list']['items'][number]
 
-type FilterState = {
-  status: string[]
-  priority: number[]
-  assigneeId?: number
-}
+type FilterState = TaskFiltersValue
 
 const defaultFilters: FilterState = {
   status: [],
@@ -33,28 +29,27 @@ export function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
 
-  const queryInput = useMemo(
-    () => ({
-      limit: PAGE_SIZE,
-      filter: normalizeFilters(filters),
-    }),
-    [filters],
-  )
+  const queryInput = useMemo<RouterInputs['tasks']['list']>(() => {
+    const filter = normalizeFilters(filters)
+    return filter ? { limit: PAGE_SIZE, filter } : { limit: PAGE_SIZE }
+  }, [filters])
 
-  const tasksQuery = trpc.tasks.list.useInfiniteQuery(queryInput, {
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-  })
+  const infiniteOptions: Parameters<typeof trpc.tasks.list.useInfiniteQuery>[1] = {
+    getNextPageParam: (lastPage: RouterOutputs['tasks']['list']) =>
+      lastPage.nextCursor ?? undefined,
+  }
+
+  const tasksQuery = trpc.tasks.list.useInfiniteQuery(queryInput, infiniteOptions)
 
   if (tasksQuery.status === 'error') {
     throw tasksQuery.error
   }
 
-  const tasks = useMemo(
-    () => tasksQuery.data?.pages.flatMap((page) => page.items) ?? [],
-    [tasksQuery.data],
-  )
+  const tasksPages = tasksQuery.data as InfiniteData<RouterOutputs['tasks']['list']> | undefined
 
-  const isInitialLoading = tasksQuery.status === 'loading'
+  const tasks = useMemo(() => tasksPages?.pages.flatMap((page) => page.items) ?? [], [tasksPages])
+
+  const isInitialLoading = tasksQuery.status === 'pending'
   const isFetchingMore = tasksQuery.isFetchingNextPage
   const isRefetching = tasksQuery.isFetching && !isFetchingMore && !isInitialLoading
 
@@ -219,12 +214,22 @@ export function TasksPage() {
   )
 }
 
-function normalizeFilters(filters: FilterState) {
-  return {
-    status: filters.status.length ? filters.status : undefined,
-    priority: filters.priority.length ? filters.priority : undefined,
-    assigneeId: filters.assigneeId ? Number(filters.assigneeId) : undefined,
+function normalizeFilters(
+  filters: FilterState,
+): RouterInputs['tasks']['list']['filter'] | undefined {
+  const next: RouterInputs['tasks']['list']['filter'] = {}
+
+  if (filters.status.length) {
+    next.status = filters.status
   }
+  if (filters.priority.length) {
+    next.priority = filters.priority
+  }
+  if (filters.assigneeId !== undefined && filters.assigneeId !== null) {
+    next.assigneeId = Number(filters.assigneeId)
+  }
+
+  return Object.keys(next).length ? next : undefined
 }
 
 type TasksInfiniteData = InfiniteData<RouterOutputs['tasks']['list']>

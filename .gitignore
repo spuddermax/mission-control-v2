@@ -35,6 +35,7 @@ certs/
 coverage/
 playwright-report/
 test-results/
+tmp/
 .vscode/*
 !.vscode/extensions.json
 .idea

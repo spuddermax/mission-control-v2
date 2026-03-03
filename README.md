@@ -1,59 +1,74 @@
 # Mission Control Dashboard
 
-Fresh Vite + React 18 foundation for the Mission Control rebuild described in `PRD.md`. The repo currently hosts the frontend scaffold; upcoming tasks will add the API layer, database, and UI components.
+Mission Control is a Vite + React 18 frontends paired with an Express/tRPC API and a better-sqlite3 database. The UI follows a Linear-inspired brief in `PRD.md`, while `tasklist.md` tracks implementation order.
 
 ## Prerequisites
 
-- Node.js 20+ (uses corepack-enabled npm)
-- SQLite installed locally if you want to inspect the future `db.sqlite`
+- Node.js 20+ (Corepack-enabled npm)
+- SQLite 3 (optional, for inspecting `db.sqlite`)
+- mkcert (only if you need HTTPS preview on `mcp.lan`)
+- Playwright browsers (`npx playwright install --with-deps`) for the smoke suite
 
-## Getting Started
+## Installation & Local Development
 
 ```bash
-# install deps
 npm install
-
-# start Vite + API (API stub lands in later tasks)
 npm run dev
 ```
 
-Vite serves the client at <http://localhost:5173> by default.
+`npm run dev` launches both the Vite client (default `http://127.0.0.1:5173`) and the Express API on port `3001` via `tsx`. The client proxies `/api` requests to the local API so CRUD flows mirror production.
 
-## Useful Scripts
+## Database Utilities
 
-| Command           | Purpose                                                        |
-| ----------------- | -------------------------------------------------------------- |
-| `npm run dev`     | Launches Vite dev server (API server will be wired in Task 4). |
-| `npm run build`   | Type-checks (`tsc -b`) then builds the production bundle.      |
-| `npm run preview` | Serves the production build locally.                           |
-| `npm run lint`    | Runs the flat ESLint config (to be expanded in Task 2).        |
-| `npm run test`    | Reserved for Vitest once suites exist.                         |
+| Command               | Purpose                                            |
+| --------------------- | -------------------------------------------------- |
+| `npm run db:generate` | Generate Drizzle SQL migrations from the schema.   |
+| `npm run db:migrate`  | Apply pending migrations to `db.sqlite`.           |
+| `npm run db:studio`   | Launch Drizzle Studio for inspecting/editing data. |
 
-## LAN Preview over HTTPS (`mcp.lan`)
+`src/server/db/seeds.ts` contains deterministic data for agents, tasks, and notes. The test suites (Vitest + Playwright) use the helpers in that file to provision in-memory or temporary file-backed databases.
 
-When you need to test the production build on multiple devices, run the preview server over HTTPS with a certificate for `mcp.lan`:
+## Testing
 
-1. **Install mkcert (one-time):** `mkcert -install`
-2. **Generate a LAN cert + key:**
-   ```bash
-   mkdir -p certs
-   mkcert -cert-file certs/mcp.lan.pem -key-file certs/mcp.lan-key.pem mcp.lan
-   ```
-3. **Point `mcp.lan` at your dev machine** via `/etc/hosts` (or router DNS) – e.g. `192.168.0.65 mcp.lan`.
-4. **Build + run the preview server:**
-   ```bash
-   npm run build
-   MCP_HTTPS=true \
-   MCP_HTTPS_CERT=certs/mcp.lan.pem \
-   MCP_HTTPS_KEY=certs/mcp.lan-key.pem \
-   npm run preview -- --host mcp.lan --https
-   ```
+| Command              | Purpose                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| `npm run test`       | Runs Vitest in CI mode (`--run`) with the React Testing Library setup (`src/test/setupTests.ts`). |
+| `npm run test:watch` | Interactive Vitest watch mode.                                                                    |
+| `npm run test:e2e`   | Builds the app and runs the Playwright smoke test (create → edit → delete task).                  |
 
-The `MCP_HTTPS` flag enables HTTPS mode inside `vite.config.ts`; the optional `MCP_HTTPS_CERT`/`MCP_HTTPS_KEY` variables let you point at any mkcert-issued files. If either path is missing the preview command will exit with a helpful error so you know to re-run `mkcert`.
+### Playwright Smoke Suite
+
+The config in `playwright.config.ts` boots both the Express API and the production preview build before executing `playwright/tasks.spec.ts`. Key env vars:
+
+- `PLAYWRIGHT_TEST_HOST` (default `127.0.0.1`) – host to bind the preview.
+- `MCP_PREVIEW_PORT` (default `4173`) – Vite preview port.
+- `MCP_SERVER_PORT` (default `3001`) – Express API port.
+- `PLAYWRIGHT_DB_PATH` (default `tmp/e2e.db.sqlite`) – temporary sqlite file that resets every run.
+
+Running `npm run test:e2e` removes the temp DB, rebuilds, then launches both servers automatically. Ensure Playwright browsers are installed (`npx playwright install --with-deps`) the first time.
+
+## Previewing Production Builds
+
+`npm run build` runs `tsc -b` plus `vite build`, placing assets in `dist/`. To inspect the built bundle locally:
+
+```bash
+npm run preview -- --host 127.0.0.1 --port 4173
+```
+
+For HTTPS + LAN testing, generate mkcert certificates and set the environment variables consumed by `scripts/preview.mjs`:
+
+```bash
+MCP_HTTPS=true \
+MCP_HTTPS_CERT=certs/mcp.lan.pem \
+MCP_HTTPS_KEY=certs/mcp.lan-key.pem \
+npm run preview -- --host mcp.lan --https
+```
+
+The script validates that both certificate paths exist before Vite starts, mirroring the deployment checks planned for Section 7.
 
 ## Project Roadmap
 
-- `tasklist.md` tracks the authoritative step-by-step work plan.
-- `PRD.md` explains the product requirements and UX expectations.
+- `PRD.md` documents product goals, UX, and scope.
+- `tasklist.md` defines the ordered engineering checklist (includes commit references when a step is complete).
 
-Check those docs for the current status before starting new work.
+Always consult those files before picking up the next task—the workflow enforces one checklist item per commit with a mandatory reflection step.

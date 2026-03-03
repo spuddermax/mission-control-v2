@@ -6,6 +6,8 @@ import type { DatabaseClient } from './index'
 import * as schema from './schema'
 import type { TaskStatus } from './schema'
 
+type SqliteInstance = InstanceType<typeof Database>
+
 type SeedTask = {
   title: string
   description?: string
@@ -21,12 +23,12 @@ type SeedTaskNote = {
   content: string
 }
 
-export const baseAgentSeeds = [
+export const baseAgentSeeds: schema.InsertAgent[] = [
   { name: 'Max MCP', status: 'working', preferredModel: 'gpt-5.1-codex' },
   { name: 'Ops Monitor', status: 'idle', preferredModel: 'grok-4' },
   { name: 'Brief Writer', status: 'idle', preferredModel: 'gpt-4.1' },
   { name: 'Code Runner', status: 'working', preferredModel: 'gpt-5.1-codex' },
-] as const
+]
 
 export const baseTaskSeeds: SeedTask[] = [
   {
@@ -72,7 +74,7 @@ export const baseTaskNoteSeeds: SeedTaskNote[] = [
   },
 ]
 
-function ensureInMemorySchema(sqlite: Database.Database) {
+function ensureInMemorySchema(sqlite: SqliteInstance) {
   const schemaSql = `
     CREATE TABLE IF NOT EXISTS agents (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,16 +178,21 @@ export async function seedDatabase(client: DatabaseClient = appDb) {
   }
 }
 
-export function createTestDatabase(filename = ':memory:') {
+type TestDatabase = {
+  sqlite: SqliteInstance
+  db: DatabaseClient
+}
+
+export function createTestDatabase(filename = ':memory:'): TestDatabase {
   const sqlite = new Database(filename)
   sqlite.pragma('journal_mode = WAL')
   sqlite.pragma('foreign_keys = ON')
   ensureInMemorySchema(sqlite)
-  const db = drizzle(sqlite, { schema })
+  const db = drizzle(sqlite, { schema }) as DatabaseClient
   return { sqlite, db }
 }
 
-export async function prepareSeededTestDb() {
+export async function prepareSeededTestDb(): Promise<TestDatabase & { cleanup: () => void }> {
   const { sqlite, db } = createTestDatabase()
   await seedDatabase(db)
   return {

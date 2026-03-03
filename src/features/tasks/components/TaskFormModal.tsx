@@ -26,9 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import type { TaskStatus } from '@/server/db/schema'
 import type { RouterOutputs } from '@/utils/trpc'
 
-const statusOptions = [
+const statusOptions: { label: string; value: TaskStatus }[] = [
   { label: 'To Do', value: 'todo' },
   { label: 'In Progress', value: 'in-progress' },
   { label: 'Blocked', value: 'blocked' },
@@ -40,7 +41,7 @@ type Task = RouterOutputs['tasks']['list']['items'][number]
 export type TaskFormValues = {
   title: string
   description: string
-  status: string
+  status: TaskStatus
   priority: number
   assigneeAgentId?: number | null
 }
@@ -56,7 +57,7 @@ type TaskFormModalProps = {
 const defaultValues: TaskFormValues = {
   title: '',
   description: '',
-  status: 'todo',
+  status: 'todo' as TaskStatus,
   priority: 1,
   assigneeAgentId: null,
 }

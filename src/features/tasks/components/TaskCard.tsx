@@ -60,7 +60,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
   const priorityTheme = priorityThemes[task.priority] ?? priorityThemes[0]
 
   return (
-    <Card className="backdrop-blur">
+    <Card className="backdrop-blur" data-testid="task-card">
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div className="space-y-1">
           <CardTitle className="text-xl">{task.title}</CardTitle>

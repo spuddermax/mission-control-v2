@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import type { RouterOutputs } from '@/types/trpc'
 
 import { TaskCard } from './TaskCard'
@@ -22,23 +23,29 @@ export function TaskList({
   onDelete,
 }: TaskListProps) {
   if (!tasks.length && !isLoading) {
-    return <div className="empty-state">No tasks yet. Create your first mission.</div>
+    return (
+      <div className="rounded-xl border border-dashed border-slate-200 bg-white/80 p-10 text-center text-sm text-muted-foreground">
+        No tasks yet. Create your first mission to get started.
+      </div>
+    )
   }
 
   return (
-    <div>
-      <div className="task-grid">
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {tasks.map((task) => (
           <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />
         ))}
       </div>
-      <div className="task-grid__footer">
+      <div className="flex justify-center">
         {hasMore && (
-          <button type="button" className="btn" onClick={onLoadMore} disabled={isLoading}>
+          <Button variant="outline" size="sm" disabled={isLoading} onClick={onLoadMore}>
             {isLoading ? 'Loading…' : 'Load more'}
-          </button>
+          </Button>
         )}
-        {!hasMore && !!tasks.length && <p className="task-grid__end">You have reached the end.</p>}
+        {!hasMore && !!tasks.length && (
+          <p className="text-sm text-muted-foreground">You have reached the end.</p>
+        )}
       </div>
     </div>
   )

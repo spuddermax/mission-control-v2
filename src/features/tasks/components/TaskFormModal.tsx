@@ -1,5 +1,31 @@
 import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { RouterOutputs } from '@/types/trpc'
 
 const statusOptions = [
@@ -36,128 +62,162 @@ const defaultValues: TaskFormValues = {
 }
 
 export function TaskFormModal({ mode, open, task, onClose, onSubmit }: TaskFormModalProps) {
-  const [values, setValues] = useState<TaskFormValues>(defaultValues)
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
+
+  const form = useForm<TaskFormValues>({
+    defaultValues,
+  })
 
   useEffect(() => {
-    if (open) {
-      if (mode === 'edit' && task) {
-        setValues({
-          title: task.title,
-          description: task.description ?? '',
-          status: task.status,
-          priority: task.priority,
-          assigneeAgentId: task.assigneeAgentId ?? null,
-        })
-      } else {
-        setValues(defaultValues)
-      }
-      setError(null)
-      setIsSaving(false)
+    if (!open) return
+    if (mode === 'edit' && task) {
+      form.reset({
+        title: task.title,
+        description: task.description ?? '',
+        status: task.status,
+        priority: task.priority,
+        assigneeAgentId: task.assigneeAgentId ?? null,
+      })
+    } else {
+      form.reset(defaultValues)
     }
-  }, [mode, open, task])
+  }, [form, mode, open, task])
 
-  if (!open) return null
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setIsSaving(true)
-    setError(null)
-    try {
-      await onSubmit(values)
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
       onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
-    } finally {
-      setIsSaving(false)
+      setFormError(null)
     }
   }
 
+  const submitHandler = form.handleSubmit(async (values) => {
+    setFormError(null)
+    try {
+      await onSubmit(values)
+      onClose()
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Unable to save the task')
+    }
+  })
+
   return (
-    <div className="modal__overlay" role="dialog" aria-modal>
-      <div className="modal">
-        <div className="modal__header">
-          <p className="modal__title">{mode === 'create' ? 'Create Task' : 'Edit Task'}</p>
-          <button type="button" className="btn btn--ghost" onClick={onClose}>
-            Close
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="modal__body">
-          <label className="modal__field">
-            <span>Title</span>
-            <input
-              required
-              className="input"
-              value={values.title}
-              onChange={(event) => setValues((prev) => ({ ...prev, title: event.target.value }))}
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{mode === 'create' ? 'Create Task' : 'Edit Task'}</DialogTitle>
+          <DialogDescription>
+            Define the mission brief, assign ownership, and set the current state.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={submitHandler}>
+            <FormField
+              control={form.control}
+              name="title"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ship logs to HQ" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </label>
-          <label className="modal__field">
-            <span>Description</span>
-            <textarea
-              className="textarea"
-              rows={4}
-              value={values.description}
-              onChange={(event) =>
-                setValues((prev) => ({ ...prev, description: event.target.value }))
-              }
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <textarea
+                      {...field}
+                      rows={4}
+                      className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      placeholder="Optional context for this mission"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </label>
-          <div className="modal__grid">
-            <label className="modal__field">
-              <span>Status</span>
-              <select
-                className="input"
-                value={values.status}
-                onChange={(event) => setValues((prev) => ({ ...prev, status: event.target.value }))}
-              >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="modal__field">
-              <span>Priority</span>
-              <input
-                type="number"
-                min={0}
-                max={5}
-                className="input"
-                value={values.priority}
-                onChange={(event) =>
-                  setValues((prev) => ({ ...prev, priority: Number(event.target.value) }))
-                }
+            <div className="grid gap-4 md:grid-cols-3">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
               />
-            </label>
-            <label className="modal__field">
-              <span>Assignee ID</span>
-              <input
-                type="number"
-                className="input"
-                value={values.assigneeAgentId ?? ''}
-                onChange={(event) =>
-                  setValues((prev) => ({
-                    ...prev,
-                    assigneeAgentId: event.target.value ? Number(event.target.value) : null,
-                  }))
-                }
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={5}
+                        {...field}
+                        value={field.value}
+                        onChange={(event) => field.onChange(Number(event.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </label>
-          </div>
-          {error && <p className="modal__error">{error}</p>}
-          <div className="modal__footer">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="btn" disabled={isSaving}>
-              {isSaving ? 'Saving…' : 'Save Task'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <FormField
+                control={form.control}
+                name="assigneeAgentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assignee ID</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        value={field.value ?? ''}
+                        onChange={(event) =>
+                          field.onChange(event.target.value ? Number(event.target.value) : null)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {formError && <p className="text-sm text-destructive">{formError}</p>}
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Saving…' : 'Save Task'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   )
 }

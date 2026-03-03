@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import type { RouterOutputs } from '@/types/trpc'
 import { trpc } from '@/utils/trpc'
 
@@ -93,9 +94,7 @@ export function TasksPage() {
           <p className="page__title">Tasks</p>
           <p className="page__subtitle">Monitor and command every agent mission.</p>
         </div>
-        <button type="button" className="btn" onClick={() => setIsCreateOpen(true)}>
-          New Task
-        </button>
+        <Button onClick={() => setIsCreateOpen(true)}>New Task</Button>
       </div>
 
       <TaskFilters value={filters} onChange={setFilters} />

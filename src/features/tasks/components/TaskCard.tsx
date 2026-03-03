@@ -1,10 +1,24 @@
+import { CalendarClock, UserRound } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 import type { RouterOutputs } from '@/types/trpc'
 
-const statusColorMap: Record<string, string> = {
-  todo: 'badge badge--muted',
-  'in-progress': 'badge badge--primary',
-  blocked: 'badge badge--danger',
-  done: 'badge badge--success',
+const statusClasses: Record<string, string> = {
+  todo: 'bg-slate-100 text-slate-700',
+  'in-progress': 'bg-blue-100 text-blue-700',
+  blocked: 'bg-rose-100 text-rose-700',
+  done: 'bg-emerald-100 text-emerald-700',
 }
 
 const priorityLabels: Record<number, string> = {
@@ -16,6 +30,13 @@ const priorityLabels: Record<number, string> = {
   5: 'Critical',
 }
 
+const priorityClasses: Record<number, string> = {
+  0: 'bg-slate-100 text-slate-700',
+  1: 'bg-amber-100 text-amber-700',
+  2: 'bg-orange-100 text-orange-700',
+  3: 'bg-red-100 text-red-700',
+}
+
 type Task = RouterOutputs['tasks']['list']['items'][number]
 
 type TaskCardProps = {
@@ -25,45 +46,68 @@ type TaskCardProps = {
 }
 
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+  const statusBadge = statusClasses[task.status] ?? 'bg-slate-100 text-slate-700'
+  const priorityBadge = priorityClasses[task.priority] ?? 'bg-slate-100 text-slate-700'
+
   return (
-    <div className="card">
-      <div className="card__header">
-        <div>
-          <p className="card__title">{task.title}</p>
-          <p className="card__meta">
-            Created by {task.creator?.name ?? 'Unknown'} · Assigned to{' '}
-            {task.assignee?.name ?? 'Unassigned'}
-          </p>
+    <Card className="backdrop-blur">
+      <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
+        <div className="space-y-1">
+          <CardTitle className="text-xl">{task.title}</CardTitle>
+          <CardDescription>
+            <span className="inline-flex items-center gap-2">
+              <UserRound className="h-4 w-4" />
+              <span>
+                {task.creator?.name ?? 'Unknown'} → {task.assignee?.name ?? 'Unassigned'}
+              </span>
+            </span>
+          </CardDescription>
         </div>
-        <div className="card__badges">
-          <span className={statusColorMap[task.status] ?? 'badge'}>{task.status}</span>
-          <span className="badge badge--muted">
+        <div className="flex flex-wrap gap-2">
+          <Badge className={cn('text-xs font-semibold capitalize', statusBadge)}>
+            {task.status}
+          </Badge>
+          <Badge className={cn('text-xs font-semibold', priorityBadge)}>
             {priorityLabels[task.priority] ?? `P${task.priority}`}
-          </span>
+          </Badge>
         </div>
-      </div>
-      {task.description && <p className="card__description">{task.description}</p>}
-      {task.notes.length > 0 && (
-        <div className="card__notes">
-          {task.notes.map((note) => (
-            <div key={note.id} className="card__note">
-              <p className="card__note-text">{note.content}</p>
-              <p className="card__note-meta">
-                {note.createdByAgentId ? `Agent ${note.createdByAgentId}` : 'Unknown'} ·{' '}
-                {new Date(note.createdAt ?? '').toLocaleString()}
-              </p>
-            </div>
-          ))}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {task.description && <p className="text-sm text-foreground/90">{task.description}</p>}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <CalendarClock className="h-4 w-4" />
+          <span>{new Date(task.createdAt ?? '').toLocaleString()}</span>
         </div>
-      )}
-      <div className="card__actions">
-        <button type="button" className="btn btn--ghost" onClick={() => onEdit(task)}>
+        {task.notes.length > 0 && (
+          <div className="space-y-3 rounded-lg border border-slate-100/60 bg-slate-50/80 p-3">
+            {task.notes.map((note, index) => (
+              <div key={note.id} className="space-y-1 text-sm">
+                <p>{note.content}</p>
+                <div className="text-xs text-muted-foreground">
+                  <span className="font-medium">
+                    {note.createdByAgentId ? `Agent ${note.createdByAgentId}` : 'Unknown agent'}
+                  </span>{' '}
+                  · {new Date(note.createdAt ?? '').toLocaleString()}
+                </div>
+                {index < task.notes.length - 1 && <Separator className="bg-slate-200" />}
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="justify-end gap-2">
+        <Button variant="ghost" size="sm" onClick={() => onEdit(task)}>
           Edit
-        </button>
-        <button type="button" className="btn btn--ghost-danger" onClick={() => onDelete(task)}>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-rose-600 hover:text-rose-600"
+          onClick={() => onDelete(task)}
+        >
           Delete
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }

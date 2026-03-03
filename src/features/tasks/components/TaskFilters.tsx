@@ -1,3 +1,10 @@
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
+
 const statusOptions = [
   { label: 'To Do', value: 'todo' },
   { label: 'In Progress', value: 'in-progress' },
@@ -39,56 +46,86 @@ export function TaskFilters({ value, onChange }: TaskFiltersProps) {
   }
 
   return (
-    <section className="panel filters">
-      <div>
-        <p className="filters__label">Status</p>
-        <div className="filters__chip-row">
-          {statusOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={['chip', value.status.includes(option.value) && 'chip--active']
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => toggleStatus(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
+    <Card className="backdrop-blur">
+      <CardHeader>
+        <CardTitle className="text-base">Filters</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6 text-sm">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Status
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {statusOptions.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                variant={value.status.includes(option.value) ? 'default' : 'outline'}
+                size="sm"
+                className={cn('rounded-full px-3', value.status.includes(option.value) && 'shadow')}
+                onClick={() => toggleStatus(option.value)}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div>
-        <p className="filters__label">Priority</p>
-        <div className="filters__chip-row">
-          {priorityOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={['chip', value.priority.includes(option.value) && 'chip--active']
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => togglePriority(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
+        <Separator />
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Priority
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {priorityOptions.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                variant={value.priority.includes(option.value) ? 'default' : 'outline'}
+                size="sm"
+                className={cn(
+                  'rounded-full px-3',
+                  value.priority.includes(option.value) && 'shadow',
+                )}
+                onClick={() => togglePriority(option.value)}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div>
-        <p className="filters__label">Assignee ID</p>
-        <input
-          type="number"
-          className="input"
-          placeholder="Any"
-          value={value.assigneeId ?? ''}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              assigneeId: event.target.value ? Number(event.target.value) : undefined,
-            })
-          }
-        />
-      </div>
-    </section>
+        <Separator />
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Assignee ID
+          </p>
+          <Input
+            type="number"
+            placeholder="Any"
+            value={value.assigneeId ?? ''}
+            onChange={(event) =>
+              onChange({
+                ...value,
+                assigneeId: event.target.value ? Number(event.target.value) : undefined,
+              })
+            }
+          />
+        </div>
+        {(value.status.length > 0 || value.priority.length > 0 || value.assigneeId) && (
+          <div className="flex flex-wrap gap-2 pt-2 text-xs">
+            {value.status.map((status) => (
+              <Badge key={`status-${status}`} variant="outline" className="capitalize">
+                {status}
+              </Badge>
+            ))}
+            {value.priority.map((priority) => (
+              <Badge key={`priority-${priority}`} variant="outline">
+                P{priority}
+              </Badge>
+            ))}
+            {value.assigneeId && <Badge variant="outline">Agent {value.assigneeId}</Badge>}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

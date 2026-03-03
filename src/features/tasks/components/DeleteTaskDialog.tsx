@@ -1,57 +1,51 @@
-import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 type DeleteTaskDialogProps = {
   open: boolean
   taskTitle?: string
-  onConfirm: () => Promise<void>
   onClose: () => void
+  onConfirm: () => Promise<void> | void
 }
 
-export function DeleteTaskDialog({ open, taskTitle, onConfirm, onClose }: DeleteTaskDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  if (!open) return null
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    setError(null)
-    try {
-      await onConfirm()
+export function DeleteTaskDialog({ open, taskTitle, onClose, onConfirm }: DeleteTaskDialogProps) {
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
       onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to delete task')
-    } finally {
-      setIsDeleting(false)
     }
   }
 
+  const handleConfirm = async () => {
+    await onConfirm()
+    onClose()
+  }
+
   return (
-    <div className="modal__overlay" role="dialog" aria-modal>
-      <div className="modal">
-        <div className="modal__header">
-          <p className="modal__title">Delete task</p>
-        </div>
-        <div className="modal__body">
-          <p>
-            Are you sure you want to delete “{taskTitle ?? 'this task'}”? This action is reversible.
-          </p>
-          {error && <p className="modal__error">{error}</p>}
-        </div>
-        <div className="modal__footer">
-          <button type="button" className="btn btn--ghost" onClick={onClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete task</DialogTitle>
+          <DialogDescription>
+            This action is irreversible. {taskTitle ? `“${taskTitle}”` : 'This task'} will be
+            removed for all operators.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            type="button"
-            className="btn btn--danger"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? 'Deleting…' : 'Delete task'}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+          <Button type="button" variant="destructive" onClick={handleConfirm}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

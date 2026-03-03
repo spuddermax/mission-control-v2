@@ -15,7 +15,7 @@
 - [x] 567f719 Commit `chore: rebootstrap mission-control (clean slate)`.
 
 ## 1. Baseline Config (Fresh Project)
-- [ ] Install core deps: React 18.3, React Router 6.27, TanStack Query 5, tRPC v10, zod, Express, better-sqlite3, drizzle-orm, shadcn/ui, lucide-react.
+- [x] ca2e06e Install core deps: React 18.3, React Router 6.27, TanStack Query 5, tRPC v10, zod, Express, better-sqlite3, drizzle-orm, shadcn/ui, lucide-react.
 - [ ] Install dev deps: Vite 5.x, TypeScript 5.8, ESLint + plugins, Prettier, Tailwind 3.4, Vitest, Playwright stub, tsx, drizzle-kit, Husky + lint-staged.
 - [ ] `.gitignore` (node_modules, dist, db.sqlite, drizzle/, .env*, certs, etc.).
 - [ ] README.md updated with fresh install/dev instructions.

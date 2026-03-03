@@ -7,12 +7,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+
+# Builds / Bundles
+dist/
+dist-ssr/
 *.local
 
-# Editor directories and files
+# Database + migrations
+db.sqlite
+db.*.sqlite
+/turbo/
+drizzle/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+certs/
+*.pem
+*.key
+
+# Tooling artifacts
+coverage/
+playwright-report/
+test-results/
 .vscode/*
 !.vscode/extensions.json
 .idea

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { RouterOutputs } from '@/types/trpc'
-import { trpc } from '@/lib/trpc'
+import { trpc } from '@/utils/trpc'
 
 import { DeleteTaskDialog } from './components/DeleteTaskDialog'
 import { TaskFilters } from './components/TaskFilters'

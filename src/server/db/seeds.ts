@@ -72,6 +72,53 @@ export const baseTaskNoteSeeds: SeedTaskNote[] = [
   },
 ]
 
+function ensureInMemorySchema(sqlite: Database.Database) {
+  const schemaSql = `
+    CREATE TABLE IF NOT EXISTS agents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'idle',
+      preferred_model TEXT DEFAULT 'grok-4',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_by_agent_id INTEGER,
+      deleted_at TEXT
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS agents_name_unique ON agents (name);
+
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL DEFAULT 'todo',
+      priority INTEGER NOT NULL DEFAULT 0,
+      created_by_agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL,
+      assignee_agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL,
+      updated_by_agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      deleted_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS tasks_status_priority_idx ON tasks (status, priority, created_at);
+    CREATE INDEX IF NOT EXISTS tasks_assignee_idx ON tasks (assignee_agent_id);
+    CREATE INDEX IF NOT EXISTS tasks_created_by_idx ON tasks (created_by_agent_id);
+
+    CREATE TABLE IF NOT EXISTS task_notes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+      content TEXT NOT NULL,
+      created_by_agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL,
+      updated_by_agent_id INTEGER REFERENCES agents(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      deleted_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS task_notes_task_id_idx ON task_notes (task_id, created_at);
+  `
+
+  sqlite.exec(schemaSql)
+}
+
 export async function seedDatabase(client: DatabaseClient = appDb) {
   await client.delete(schema.taskNotes)
   await client.delete(schema.tasks)
@@ -133,6 +180,7 @@ export function createTestDatabase(filename = ':memory:') {
   const sqlite = new Database(filename)
   sqlite.pragma('journal_mode = WAL')
   sqlite.pragma('foreign_keys = ON')
+  ensureInMemorySchema(sqlite)
   const db = drizzle(sqlite, { schema })
   return { sqlite, db }
 }

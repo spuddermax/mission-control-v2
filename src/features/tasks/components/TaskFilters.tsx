@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
@@ -102,10 +103,14 @@ export function TaskFilters({ value, onChange }: TaskFiltersProps) {
         </div>
         <Separator />
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Label
+            htmlFor="task-filter-assignee"
+            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+          >
             Assignee ID
-          </p>
+          </Label>
           <Input
+            id="task-filter-assignee"
             type="number"
             placeholder="Any"
             value={value.assigneeId ?? ''}

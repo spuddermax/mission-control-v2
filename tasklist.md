@@ -62,7 +62,7 @@
 
 ## 7. Testing & Deploy Prep
 
-- [ ] Vitest suites: DB/tRPC unit tests + React hooks/components.
+- [x] f83163c Vitest suites: DB/tRPC unit tests + React hooks/components.
 - [ ] Playwright smoke stub (create/edit task) using preview build.
 - [ ] `npm run build` + `npm run preview --host mcp.lan --https` verification (mkcert instructions in README).
 - [ ] Document future pm2 deployment (optional) + create demo plan.

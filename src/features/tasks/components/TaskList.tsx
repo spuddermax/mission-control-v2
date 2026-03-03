@@ -30,7 +30,11 @@ export function TaskList({
   onDelete,
 }: TaskListProps) {
   if (isInitialLoading) {
-    return <TaskListSkeleton />
+    return (
+      <div role="status" aria-label="Loading tasks">
+        <TaskListSkeleton />
+      </div>
+    )
   }
 
   if (!tasks.length) {

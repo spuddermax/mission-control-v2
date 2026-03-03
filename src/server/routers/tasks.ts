@@ -1,4 +1,4 @@
-import { desc, sql } from 'drizzle-orm'
+import { and, desc, eq, isNull } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
@@ -110,22 +110,26 @@ export const tasksRouter = createTRPCRouter({
   }),
 
   update: publicProcedure.input(updateInput).mutation(async ({ ctx, input }) => {
-    const updateData: Record<string, unknown> = {}
-    if (input.title !== undefined) updateData.title = input.title
-    if (input.description !== undefined) updateData.description = input.description
-    if (input.status !== undefined) updateData.status = input.status
-    if (input.priority !== undefined) updateData.priority = input.priority
-    if (input.assigneeAgentId !== undefined)
-      updateData.assigneeAgentId = input.assigneeAgentId ?? null
-    if (input.updatedByAgentId !== undefined)
-      updateData.updatedByAgentId = input.updatedByAgentId ?? null
-    updateData.updatedAt = sql`CURRENT_TIMESTAMP`
+    const updateData = {
+      ...(input.title !== undefined ? { title: input.title } : {}),
+      ...(input.description !== undefined ? { description: input.description } : {}),
+      ...(input.status !== undefined ? { status: input.status } : {}),
+      ...(input.priority !== undefined ? { priority: input.priority } : {}),
+      ...(input.assigneeAgentId !== undefined
+        ? { assigneeAgentId: input.assigneeAgentId ?? null }
+        : {}),
+      ...(input.updatedByAgentId !== undefined
+        ? { updatedByAgentId: input.updatedByAgentId ?? null }
+        : {}),
+      updatedAt: new Date().toISOString(),
+    }
 
-    const updated = await ctx.db
+    const updateQuery = ctx.db
       .update(tasks)
       .set(updateData)
-      .where((task, { and, eq, isNull }) => and(eq(task.id, input.id), isNull(task.deletedAt)))
-      .returning({ id: tasks.id })
+      .where(and(eq(tasks.id, input.id), isNull(tasks.deletedAt)))
+
+    const updated = await updateQuery.returning({ id: tasks.id })
 
     if (!updated.length) {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' })
@@ -142,11 +146,11 @@ export const tasksRouter = createTRPCRouter({
     const deleted = await ctx.db
       .update(tasks)
       .set({
-        deletedAt: sql`CURRENT_TIMESTAMP`,
-        updatedAt: sql`CURRENT_TIMESTAMP`,
+        deletedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         updatedByAgentId: input.updatedByAgentId ?? null,
       })
-      .where((task, { and, eq, isNull }) => and(eq(task.id, input.id), isNull(task.deletedAt)))
+      .where(and(eq(tasks.id, input.id), isNull(tasks.deletedAt)))
       .returning({ id: tasks.id })
 
     return { success: deleted.length > 0 }
